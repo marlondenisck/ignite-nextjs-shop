@@ -3,11 +3,25 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --white: #FFF;
+  --gray900: #121214;
+  --gray800: #202024;
+  --gray300: #c4c4cc;
+  --gray100: #e1e1e6;
+  --green500: #00875f;
+  --green300: #00b37e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-white: var(--white);
+  --color-gray900: var(--gray900);
+  --color-gray800: var(--gray800);
+  --color-gray300: var(--gray300);
+  --color-gray100: var(--gray100);
+  --color-green500: var(--green500);
+  --color-green300: var(--green300);
   --font-roboto: var(--font-roboto);
 }
 
@@ -19,7 +33,9 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--gray900);
+  color: var(--gray100);
   font-family: var(--font-roboto);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
