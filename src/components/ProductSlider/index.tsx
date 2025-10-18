@@ -8,7 +8,7 @@ interface Product {
   id: string
   name: string
   imageUrl: string
-  price: number
+  price: string
 }
 
 interface ProductSliderProps {
@@ -32,7 +32,7 @@ export default function ProductSlider({ products }: ProductSliderProps) {
         <Link 
           key={product.id}
           href={`/product/${product.id}`} 
-          className='bg-gradient-to-b from-green300 to-[#7465d4] rounded-lg cursor-pointer relative overflow-hidden flex items-center justify-center group keen-slider__slide'
+          className='bg-gradient-to-b from-green-300 to-[#7465d4] rounded-lg cursor-pointer relative overflow-hidden flex items-center justify-center group keen-slider__slide'
         >
           <Image src={product.imageUrl} width={520} height={480} alt={product.name} className="object-cover" />
 

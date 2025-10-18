@@ -37,7 +37,6 @@ export default async function Home() {
 
   return (
       <>
-        <Header />
         <main className='flex flex-col items-start justify-center pl-4'>
           <ProductSlider products={products} />
         </main>
