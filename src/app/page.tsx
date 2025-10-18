@@ -3,6 +3,7 @@ import ProductSlider from '@/components/ProductSlider'
 import { stripe } from '@/lib/stripe'
 import Stripe from 'stripe'
 
+// Função assíncrona direta no Server Component
 async function getProducts() {
   const response = await stripe.products.list({
     expand: ['data.default_price']
@@ -20,6 +21,11 @@ async function getProducts() {
 
   return products
 }
+
+// Static Generation (equivalente ao getStaticProps)
+// Controla o comportamento de cache/revalidação
+export const revalidate = 3600; // revalidar a cada 1 hora
+
 
 
 
