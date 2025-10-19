@@ -1,7 +1,18 @@
+import type { Metadata } from 'next'
 import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 import Image from "next/image";
 import BuyButton from "../components/BuyButton";
+
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const product = await getProduct(params.id)
+  
+  return {
+    title: `${product.name} | Ignite Shop`,
+    description: product.description,
+  }
+}
 
 // Define o tipo do produto
 type Product = {
