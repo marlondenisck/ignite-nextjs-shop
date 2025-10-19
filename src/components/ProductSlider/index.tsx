@@ -33,6 +33,7 @@ export default function ProductSlider({ products }: ProductSliderProps) {
           key={product.id}
           href={`/product/${product.id}`} 
           className='bg-gradient-to-b from-green-300 to-[#7465d4] rounded-lg cursor-pointer relative overflow-hidden flex items-center justify-center group keen-slider__slide'
+          prefetch={false}
         >
           <Image src={product.imageUrl} width={520} height={480} alt={product.name} className="object-cover" />
 
