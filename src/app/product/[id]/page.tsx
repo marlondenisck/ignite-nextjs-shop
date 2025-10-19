@@ -1,6 +1,23 @@
 import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 import Image from "next/image";
+import BuyButton from "../components/BuyButton";
+
+// Define o tipo do produto
+type Product = {
+  id: string
+  name: string
+  imageUrl: string
+  price: string
+  description: string
+  defaultPriceId: string
+}
+
+// Props do componente
+interface ProdutoPageProps {
+  params: { id: string }
+}
+
 
 // Substitui o getStaticPaths
 export async function generateStaticParams() {
@@ -17,7 +34,7 @@ export async function generateStaticParams() {
 // Controla o comportamento para produtos não listados
 export const dynamicParams = true; // equivalente ao fallback: 'blocking'
 
-async function getProduct(id: string) {
+async function getProduct(id: string): Promise<Product> {
   const product = await stripe.products.retrieve(id, {
     expand: ['default_price']
   });
@@ -32,12 +49,17 @@ async function getProduct(id: string) {
       style: 'currency',
       currency: 'BRL'
     }).format((price.unit_amount || 0) / 100),
-    description: product.description,
+    description: product.description || '',
+    defaultPriceId: price.id,
   }
 }
 
-export default async function ProdutoPage({ params }: { params: { id: string } }) {
+export default async function ProdutoPage({ params }: ProdutoPageProps) {
   const product = await getProduct(params.id);
+
+    function handleBuyButton() {
+    console.log(product.defaultPriceId);
+  }
 
   return (
     <>
@@ -52,9 +74,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
 
           <p className="mt-10 text-base leading-4 text-gray-300">{product.description}</p>
 
-          <button className="mt-auto bg-green-500 border-0 text-white rounded-[8px] p-5 cursor-pointer font-bold text-base hover:bg-green300">
-            Comprar agora
-          </button>
+          <BuyButton defaultPriceId={product.defaultPriceId} />
         </div>
       </div>
     </>
