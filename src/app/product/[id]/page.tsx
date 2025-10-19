@@ -1,7 +1,21 @@
-import Header from "@/components/Header";
 import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 import Image from "next/image";
+
+// Substitui o getStaticPaths
+export async function generateStaticParams() {
+  // Busca alguns produtos para gerar as páginas no build
+  const products = await stripe.products.list({
+    limit: 10, // Limite para não gerar muitas páginas no build
+  });
+
+  return products.data.map((product) => ({
+    id: product.id,
+  }));
+}
+
+// Controla o comportamento para produtos não listados
+export const dynamicParams = true; // equivalente ao fallback: 'blocking'
 
 async function getProduct(id: string) {
   const product = await stripe.products.retrieve(id, {
