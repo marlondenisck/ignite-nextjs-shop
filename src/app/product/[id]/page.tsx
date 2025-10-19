@@ -19,7 +19,8 @@ type Product = {
   id: string
   name: string
   imageUrl: string
-  price: string
+  price: number
+  priceFormatted: string
   description: string
   defaultPriceId: string
 }
@@ -56,7 +57,8 @@ async function getProduct(id: string): Promise<Product> {
     id: product.id,
     name: product.name,
     imageUrl: product.images[0],
-    price: new Intl.NumberFormat('pt-BR', {
+    price: (price.unit_amount || 0) / 100, // Retorna como número
+    priceFormatted: new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format((price.unit_amount || 0) / 100),
@@ -68,10 +70,6 @@ async function getProduct(id: string): Promise<Product> {
 export default async function ProdutoPage({ params }: ProdutoPageProps) {
   const product = await getProduct(params.id);
 
-    function handleBuyButton() {
-    console.log(product.defaultPriceId);
-  }
-
   return (
     <>
       <div className="grid grid-cols-2 gap-16 items-stretch max-w-7xl mx-auto p-4">
@@ -81,11 +79,19 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
 
         <div className="flex flex-col">
           <h1 className="text-2xl text-gray-300">{product.name}</h1>
-          <span className="mt-4 block text-2xl text-green-300">{product.price}</span>
+          <span className="mt-4 block text-2xl text-green-300">{product.priceFormatted}</span>
 
           <p className="mt-10 text-base leading-4 text-gray-300">{product.description}</p>
 
-          <BuyButton defaultPriceId={product.defaultPriceId} />
+          <BuyButton 
+            product={{
+              id: product.id,
+              name: product.name,
+              imageUrl: product.imageUrl,
+              price: product.price,
+              defaultPriceId: product.defaultPriceId,
+            }} 
+          />
         </div>
       </div>
     </>

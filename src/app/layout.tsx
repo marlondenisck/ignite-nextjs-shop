@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
+import { CartProvider } from "@/contexts/CartContext";
+import CartDrawer from "@/components/CartDrawer";
 
 const robotFont = Roboto({
   weight: ["400", "800"],
@@ -28,8 +30,11 @@ export default function RootLayout({
       <body
         className={`${robotFont.variable} antialiased`}
       >
-        <Header />
-        {children}
+        <CartProvider>
+          <Header />
+          {children}
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );

@@ -1,61 +1,104 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { stripe } from '@/lib/stripe';
-import Stripe from 'stripe';
-import { redirect } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCart } from '@/contexts/CartContext';
 
-interface SuccessPageProps {
-  searchParams: { session_id?: string }
+interface SessionData {
+  customerName: string;
+  products: {
+    name: string;
+    imageUrl: string;
+  }[];
 }
 
-async function getSessionData(sessionId: string) {
-  try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ['line_items', 'line_items.data.price.product']
-    });
+export default function Success() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { clearCart } = useCart();
+  
+  const [sessionData, setSessionData] = useState<SessionData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    const customerName = session.customer_details?.name;
-    const product = session.line_items?.data[0]?.price?.product as Stripe.Product;
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
 
-    return {
-      customerName,
-      product: {
-        name: product.name,
-        imageUrl: product.images[0]
+    if (!sessionId) {
+      router.push('/');
+      return;
+    }
+
+    // Buscar dados da sessão
+    async function fetchSessionData() {
+      try {
+        const response = await fetch(`/api/checkout/session?session_id=${sessionId}`);
+        
+        if (!response.ok) {
+          throw new Error('Erro ao buscar sessão');
+        }
+
+        const data = await response.json();
+        setSessionData(data);
+        
+        // Limpar carrinho após sucesso
+        clearCart();
+      } catch (error) {
+        console.error('Erro:', error);
+        router.push('/');
+      } finally {
+        setLoading(false);
       }
-    };
-  } catch (error) {
-    console.error('Erro ao buscar sessão:', error);
-    return null;
+    }
+
+    fetchSessionData();
+  }, [searchParams, router, clearCart]);
+
+  if (loading) {
+    return (
+      <main className='flex flex-col items-center justify-center mx-auto m-0 h-[656px]'>
+        <p className='text-xl text-gray-100'>Carregando...</p>
+      </main>
+    );
   }
-}
-
-export default async function Success({ searchParams }: SuccessPageProps) {
-  const sessionId = searchParams.session_id;
-
-  if (!sessionId) {
-    redirect('/');
-  }
-
-  const sessionData = await getSessionData(sessionId);
 
   if (!sessionData) {
-    redirect('/');
+    return null;
   }
 
-  const { customerName, product } = sessionData;
+  const { customerName, products } = sessionData;
 
   return (
-    <main className='flex flex-col items-center justify-center mx-auto m-0 h-[656px]'>
-      <h1 className='text-2xl text-gray-100'>Compra efetuada</h1>
+    <main className='flex flex-col items-center justify-center mx-auto m-0 h-[656px] px-4'>
+      <h1 className='text-2xl text-gray-100'>Compra efetuada!</h1>
 
-      <div className='w-full max-w-[130px] h-[145px] bg-gradient-to-b from-green300 to-[#7465d4] rounded-lg p-1 mt-16 flex items-center justify-center'>
-        <Image src={product.imageUrl} width={120} height={110} alt={product.name} />
+      {/* Exibir produtos comprados */}
+      <div className='flex flex-wrap gap-4 mt-8 justify-center'>
+        {products.map((product, index) => (
+          <div 
+            key={index}
+            className='w-[130px] h-[145px] bg-gradient-to-b from-green300 to-[#7465d4] rounded-lg p-1 flex items-center justify-center'
+          >
+            <Image 
+              src={product.imageUrl} 
+              width={120} 
+              height={110} 
+              alt={product.name}
+              className="object-cover"
+            />
+          </div>
+        ))}
       </div>
 
       <p className='text-xl text-gray-300 max-w-[560px] text-center mt-8'>
-        Uhuul <strong>{customerName}</strong>, sua <strong>{product.name}</strong> já está a caminho da sua casa.
+        Uhuul <strong>{customerName}</strong>, sua{products.length > 1 ? 's' : ''} compra{products.length > 1 ? 's' : ''} de{' '}
+        <strong>
+          {products.length === 1 
+            ? products[0].name
+            : `${products.length} itens`
+          }
+        </strong> já {products.length > 1 ? 'estão' : 'está'} a caminho da sua casa.
       </p>
 
       <Link className='block mt-20 text-lg no-underline text-green-500 hover:text-green-300 font-bold' href="/">

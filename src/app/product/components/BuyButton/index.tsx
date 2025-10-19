@@ -1,39 +1,46 @@
 "use client";
 
+import { useCart } from '@/contexts/CartContext';
+
 interface BuyButtonProps {
-  defaultPriceId: string;
-}
-
-export default function BuyButton({ defaultPriceId }: BuyButtonProps) {
- async function handleBuyButton() {
-  try {
-    const response = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        priceId: defaultPriceId,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const { checkoutUrl } = await response.json();
-    window.location.href = checkoutUrl;
-  } catch (error) {
-    console.error('Erro:', error);
+  product: {
+    id: string;
+    name: string;
+    imageUrl: string;
+    price: number;
+    defaultPriceId: string;
   }
 }
 
+export default function BuyButton({ product }: BuyButtonProps) {
+  const { addItem, items } = useCart();
+
+  // Verificar se o produto já está no carrinho
+  const isItemInCart = items.some(item => item.id === product.id);
+
+  function handleAddToCart() {
+    if (!isItemInCart) {
+      addItem({
+        id: product.id,
+        name: product.name,
+        imageUrl: product.imageUrl,
+        price: product.price,
+        defaultPriceId: product.defaultPriceId,
+      });
+    }
+  }
+
   return (
     <button 
-      className="mt-auto bg-green-500 border-0 text-white rounded-[8px] p-5 cursor-pointer font-bold text-base hover:bg-green300"
-      onClick={handleBuyButton}
+      className={`mt-auto border-0 text-white rounded-[8px] p-5 cursor-pointer font-bold text-base transition-colors ${
+        isItemInCart 
+          ? 'bg-green-300 cursor-not-allowed' 
+          : 'bg-green-500 hover:bg-green-300'
+      }`}
+      onClick={handleAddToCart}
+      disabled={isItemInCart}
     >
-      Comprar agora
+      {isItemInCart ? 'Produto já está na sacola' : 'Adicionar à sacola'}
     </button>
   );
 }
